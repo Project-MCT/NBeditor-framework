@@ -1,10 +1,10 @@
-import implutils.NbtTree
+import implutils.ImplNbtTree
 import kotlin.test.Test
 
 @Test
 fun test() {
     println("testing!")
 
-    val label = NbtTree.NbtInteger(10)
+    val label = ImplNbtTree.ImplNbtInt(10)
     println(label)
 }
