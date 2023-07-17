@@ -1,0 +1,4 @@
+package world
+
+interface World {
+}
