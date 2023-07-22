@@ -1,4 +1,4 @@
-package nbtutils
+package com.mct.nbeditor.utils
 
 interface NbtFormatFactory {
   /**缩进长度*/

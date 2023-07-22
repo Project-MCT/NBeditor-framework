@@ -1,4 +1,0 @@
-package world
-
-interface World {
-}

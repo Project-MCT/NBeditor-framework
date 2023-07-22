@@ -1,16 +1,16 @@
-package nbtutils
+package com.mct.nbeditor.nbtutils
 
 interface NbtTree{
     var nodes: Int
-    var root: NbtTreeNode.NbtCombination?
+    var root: NbtTreeNode.NbtCompound?
 
-    fun root(): NbtTreeNode.NbtCombination{
+    fun root(): NbtTreeNode.NbtCompound {
         if (root == null) throw IllegalStateException("this tree was not initialized yet!");
-        return root as NbtTreeNode.NbtCombination
+        return root as NbtTreeNode.NbtCompound
     }
 
-    fun parseJSON(json: String)
-    fun toJSON(): String
+    fun parseSNbt(json: String)
+    fun toSNbt(): String
 
     @Suppress("UNCHECKED_CAST")
     fun accept(visitor: NbtTreeVisitor){

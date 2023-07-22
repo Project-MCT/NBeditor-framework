@@ -1,17 +1,17 @@
 package implutils
 
-import nbtutils.NbtTree
-import nbtutils.NbtTreeNode
+import com.mct.nbeditor.nbtutils.NbtTree
+import com.mct.nbeditor.nbtutils.NbtTreeNode
 
 class ImplNbtTree: NbtTree {
   override var nodes: Int = 0
-  override var root: NbtTreeNode.NbtCombination? = null
+  override var root: NbtTreeNode.NbtCompound? = null
 
-  override fun parseJSON(json: String) {
+  override fun parseSNbt(json: String) {
 
   }
 
-  override fun toJSON(): String {
+  override fun toSNbt(): String {
     return root().toString()
   }
 
@@ -54,11 +54,11 @@ class ImplNbtTree: NbtTree {
       if (this !is NbtTreeNode.NbtDouble) throw ClassCastException("node is ${this::class}, can not be cast to Double"); return this
     }
 
-    override fun asArray(): NbtTreeNode.NbtArray {
-      if (this !is NbtTreeNode.NbtArray) throw ClassCastException("node is ${this::class}, can not be cast to Array"); return this
+    override fun asArray(): NbtTreeNode.NbtList {
+      if (this !is NbtTreeNode.NbtList) throw ClassCastException("node is ${this::class}, can not be cast to Array"); return this
     }
-    override fun asObject(): NbtTreeNode.NbtCombination {
-      if (this !is NbtTreeNode.NbtCombination) throw ClassCastException("node is ${this::class}, can not be cast to js object"); return this
+    override fun asObject(): NbtTreeNode.NbtCompound {
+      if (this !is NbtTreeNode.NbtCompound) throw ClassCastException("node is ${this::class}, can not be cast to js object"); return this
     }
   }
 
@@ -100,6 +100,10 @@ class ImplNbtTree: NbtTree {
 
   class ImplNbtFloat(float: Float): ImplNbtTreeNode<Float>(), NbtTreeNode.NbtFloat{
     init { value = float; }
+
+    override fun toString(): String {
+      return value.toString() + "f"
+    }
   }
 
   class ImplNbtDouble(double: Double): ImplNbtTreeNode<Double>(), NbtTreeNode.NbtDouble{
@@ -114,8 +118,8 @@ class ImplNbtTree: NbtTree {
     init { value = bool; }
   }
 
-  class ImplNbtCombination: ImplNbtTreeNode<MutableMap<String, NbtTreeNode<Any>>>(),
-    NbtTreeNode.NbtCombination {
+  class ImplNbtCompound: ImplNbtTreeNode<MutableMap<String, NbtTreeNode<Any>>>(),
+    NbtTreeNode.NbtCompound {
     init { value = HashMap(); }
 
     override fun set(key: String, value: NbtTreeNode<Any>) { getValue()[key] = value }
@@ -137,13 +141,13 @@ class ImplNbtTree: NbtTree {
     }
   }
 
-  class ImplNbtArray: ImplNbtTreeNode<MutableList<NbtTreeNode<Any>>>(), NbtTreeNode.NbtArray {
+  open class ImplNbtArray<T, Type: NbtTreeNode<T>>: ImplNbtTreeNode<MutableList<Type>>(), NbtTreeNode.NbtArray<T, Type> {
     init { value = ArrayList(); }
 
-    override fun set(index: Int, value: NbtTreeNode<Any>){ getValue()[index] = value; }
-    override fun get(index: Int): NbtTreeNode<Any> { return getValue()[index]; }
-    override fun append(value: NbtTreeNode<Any>){ getValue().add(value) }
-    override fun remove(index: Int): NbtTreeNode<Any> { return getValue().removeAt(index) }
+    override fun set(index: Int, value: Type){ getValue()[index] = value; }
+    override fun get(index: Int): Type { return getValue()[index]; }
+    override fun append(value: Type){ getValue().add(value) }
+    override fun remove(index: Int): Type { return getValue().removeAt(index) }
 
     override fun toString(): String {
       val builder = StringBuilder("[")
@@ -155,4 +159,8 @@ class ImplNbtTree: NbtTree {
       return builder.substring(0, builder.length - 1) + "]"
     }
   }
+  class ImplNbtByteArray: ImplNbtArray<Byte, NbtTreeNode.NbtByte>(), NbtTreeNode.NbtByteArray
+  class ImplNbtIntArray: ImplNbtArray<Int, NbtTreeNode.NbtInt>(), NbtTreeNode.NbtIntArray
+  class ImplNbtLongArray: ImplNbtArray<Long, NbtTreeNode.NbtLong>(), NbtTreeNode.NbtLongArray
+  class ImplNbtList: ImplNbtArray<Any, NbtTreeNode<Any>>(), NbtTreeNode.NbtList
 }

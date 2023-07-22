@@ -1,4 +1,4 @@
-package nbtutils
+package com.mct.nbeditor.nbtutils
 
 interface NbtTreeNode<Val> {
   fun getValue(): Val
@@ -12,8 +12,8 @@ interface NbtTreeNode<Val> {
   fun asLong(): NbtLong
   fun asFloat(): NbtFloat
   fun asDouble(): NbtDouble
-  fun asArray(): NbtArray
-  fun asObject(): NbtCombination
+  fun asArray(): NbtList
+  fun asObject(): NbtCompound
 
   interface NbtLabel: NbtTreeNode<String>
   interface NbtByte: NbtTreeNode<Byte>
@@ -23,14 +23,20 @@ interface NbtTreeNode<Val> {
   interface NbtFloat: NbtTreeNode<Float>
   interface NbtDouble: NbtTreeNode<Double>
   interface NbtBoolean: NbtTreeNode<Boolean>
-  interface NbtArray: NbtTreeNode<MutableList<NbtTreeNode<Any>>>, Iterable<NbtTreeNode<Any>> {
-    fun set(index: Int, value: NbtTreeNode<Any>)
-    fun get(index: Int): NbtTreeNode<Any>
-    fun append(value: NbtTreeNode<Any>)
-    fun remove(index: Int): NbtTreeNode<Any>
-    override fun iterator(): Iterator<NbtTreeNode<Any>>{ return getValue().iterator() }
+
+  interface NbtArray<T, Type: NbtTreeNode<T>>: NbtTreeNode<MutableList<Type>>, Iterable<Type> {
+    fun set(index: Int, value: Type)
+    fun get(index: Int): Type
+    fun append(value: Type)
+    fun remove(index: Int): Type
+    override fun iterator(): Iterator<Type> { return getValue().iterator() }
   }
-  interface NbtCombination: NbtTreeNode<MutableMap<String, NbtTreeNode<Any>>>, Iterable<Map.Entry<String, NbtTreeNode<Any>>> {
+  interface NbtByteArray: NbtArray<Byte, NbtByte>
+  interface NbtIntArray: NbtArray<Int, NbtInt>
+  interface NbtLongArray: NbtArray<Long, NbtLong>
+  interface NbtList: NbtArray<Any, NbtTreeNode<Any>>
+
+  interface NbtCompound: NbtTreeNode<MutableMap<String, NbtTreeNode<Any>>>, Iterable<Map.Entry<String, NbtTreeNode<Any>>> {
     fun set(key: String, value: NbtTreeNode<Any>)
     fun get(key: String): NbtTreeNode<Any>
     fun remove(key: String): NbtTreeNode<Any>

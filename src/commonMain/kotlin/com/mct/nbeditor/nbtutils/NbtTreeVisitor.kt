@@ -1,12 +1,10 @@
-package nbtutils
-
-import platform.posix.wcswidth
+package com.mct.nbeditor.nbtutils
 
 interface NbtTreeVisitor {
   fun visit(tree: NbtTreeNode<Any>){
     when (tree) {
-      is NbtTreeNode.NbtCombination -> visitCombination(tree)
-      is NbtTreeNode.NbtArray -> visitArray(tree)
+      is NbtTreeNode.NbtCompound -> visitCombination(tree)
+      is NbtTreeNode.NbtList -> visitArray(tree)
       is NbtTreeNode.NbtLabel -> visitLabel(tree)
       is NbtTreeNode.NbtByte -> visitByte(tree)
       is NbtTreeNode.NbtShort -> visitShort(tree)
@@ -20,7 +18,7 @@ interface NbtTreeVisitor {
     }
   }
 
-  fun visitCombination(comb: NbtTreeNode.NbtCombination){
+  fun visitCombination(comb: NbtTreeNode.NbtCompound){
     for (entry in comb) {
       visitAttribute(entry.key, entry.value)
     }
@@ -30,7 +28,7 @@ interface NbtTreeVisitor {
     visit(value)
   }
 
-  fun visitArray(arr: NbtTreeNode.NbtArray){
+  fun visitArray(arr: NbtTreeNode.NbtList){
     for (node in arr) {
       visit(node)
     }

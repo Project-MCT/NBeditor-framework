@@ -25,6 +25,10 @@ kotlin {
     }
   }
 
+  nativeTarget.compilations.main.cinterops {
+    db
+  }
+
   sourceSets {
     commonMain {
 
