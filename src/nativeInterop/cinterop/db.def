@@ -1,5 +1,0 @@
-headers = /home/local/IdeaProjects/nbeditor-framework/src/nativeInterop/cinterop/include/leveldb/c.h
-headerFilter = /home/local/IdeaProjects/nbeditor-framework/src/nativeInterop/cinterop/include/leveldb/c.h
-
-compilerOpts.linux = -I/usr/include -I/usr/include/x86_64-linux-gnu
-

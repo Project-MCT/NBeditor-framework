@@ -1,5 +1,6 @@
 plugins {
-  id 'org.jetbrains.kotlin.multiplatform' version '1.9.0'
+  id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+  id 'application'
 }
 
 group = 'me.local'
@@ -7,42 +8,13 @@ version = '1.0-SNAPSHOT'
 
 repositories {
   mavenCentral()
+  maven { url 'https://jitpack.io/' }
 }
 
 kotlin {
-  def hostOs = System.getProperty("os.name")
-  def isMingwX64 = hostOs.startsWith("Windows")
-  def nativeTarget
+  jvmToolchain(8)
+}
 
-  if (hostOs == "Mac OS X") nativeTarget = macosX64('native')
-  else if (hostOs == "Linux") nativeTarget = linuxX64("native")
-  else if (isMingwX64) nativeTarget = mingwX64("native")
-  else throw new GradleException("Host OS is not supported in Kotlin/Native.")
-
-  nativeTarget.binaries {
-    sharedLib {
-      baseName = "native"
-    }
-  }
-
-  nativeTarget.compilations.main.cinterops {
-    db
-  }
-
-  sourceSets {
-    commonMain {
-
-    }
-    commonTest {
-      dependencies {
-        implementation kotlin('test')
-      }
-    }
-    nativeMain {
-
-    }
-    nativeTest {
-
-    }
-  }
+application {
+  mainClassName = 'MainKt'
 }
