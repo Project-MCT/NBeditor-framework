@@ -1,4 +1,4 @@
-package com.mct.nbeditor.nbtutils
+package org.projectmct.nbeditor.nbtutils
 
 open class NbtTreeVisitor {
   open fun <T> visit(tree: NbtTree.NbtTreeNode<T>){

@@ -1,15 +1,20 @@
-package com.mct.nbeditor.nbtutils
+package org.projectmct.nbeditor.nbtutils
 
 class NbtTree {
-  var nodes: Int = 0
-  var root: NbtCompound? = null
+  private var root: NbtCompound? = null
 
-  fun root(): NbtCompound{
+  constructor()
+
+  constructor(src: NbtCompound){
+    root = src
+  }
+
+  fun root(): NbtCompound {
     return root?: throw IllegalStateException("this tree was not initialized")
   }
 
   fun parseSNbt(json: String) {
-
+    TODO("Not yet implemented")
   }
 
   fun toSNbt(): String {
@@ -19,7 +24,7 @@ class NbtTree {
   open class NbtTreeNode<Val>{
     protected var value: Val? = null
 
-     fun getValue(): Val {
+     fun value(): Val {
       return value?: throw IllegalStateException("null value!")
     }
 
@@ -67,7 +72,7 @@ class NbtTree {
     init { value = string; }
 
     override fun toString(): String {
-      return "\"${getValue()}\""
+      return "\"${value()}\""
     }
   }
 
@@ -122,22 +127,22 @@ class NbtTree {
   class NbtCompound: NbtTreeNode<MutableMap<String, NbtTreeNode<Any>>>(), Iterable<Map.Entry<String, NbtTreeNode<Any>>>{
     init { value = HashMap(); }
 
-     fun set(key: String, value: NbtTreeNode<Any>) { getValue()[key] = value }
+     fun set(key: String, value: NbtTreeNode<Any>) { value()[key] = value }
      fun get(key: String): NbtTreeNode<Any> {
-      return getValue()[key] ?: throw IllegalArgumentException("no such attribute named $key")
+      return value()[key] ?: throw IllegalArgumentException("no such attribute named $key")
     }
      fun remove(key: String): NbtTreeNode<Any> {
-      return getValue().remove(key)?: throw IllegalArgumentException("no such attribute named $key")
+      return value().remove(key)?: throw IllegalArgumentException("no such attribute named $key")
     }
 
     override fun iterator(): Iterator<Map.Entry<String, NbtTreeNode<Any>>> {
-      return getValue().iterator()
+      return value().iterator()
     }
 
     override fun toString(): String {
       val builder = StringBuilder("{")
 
-      getValue().forEach {entry ->
+      value().forEach { entry ->
         builder.append("\"${entry.key}\":${entry.value},")
       }
 
@@ -148,19 +153,19 @@ class NbtTree {
   open class NbtArray<T, Type: NbtTreeNode<T>>: NbtTreeNode<MutableList<Type>>(), Iterable<NbtTreeNode<T>>{
     init { value = ArrayList(); }
 
-     fun set(index: Int, value: Type){ getValue()[index] = value; }
-     fun get(index: Int): Type { return getValue()[index]; }
-     fun append(value: Type){ getValue().add(value) }
-     fun remove(index: Int): Type { return getValue().removeAt(index) }
+     fun set(index: Int, value: Type){ value()[index] = value; }
+     fun get(index: Int): Type { return value()[index]; }
+     fun append(value: Type){ value().add(value) }
+     fun remove(index: Int): Type { return value().removeAt(index) }
 
     override fun iterator(): Iterator<NbtTreeNode<T>> {
-      return getValue().iterator()
+      return value().iterator()
     }
 
     override fun toString(): String {
       val builder = StringBuilder("[")
 
-      getValue().forEach {
+      value().forEach {
         builder.append("$it,")
       }
 

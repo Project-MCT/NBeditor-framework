@@ -3,18 +3,20 @@ plugins {
   id 'application'
 }
 
-group = 'me.local'
-version = '1.0-SNAPSHOT'
+group = 'org.projectmct'
+version = 'alpha-0.1'
 
 repositories {
   mavenCentral()
   maven { url 'https://jitpack.io/' }
 }
 
-kotlin {
-  jvmToolchain(8)
+java {
+  toolchain {
+    languageVersion = JavaLanguageVersion.of(17)
+  }
 }
 
-application {
-  mainClassName = 'MainKt'
+kotlin {
+  jvmToolchain(17)
 }
