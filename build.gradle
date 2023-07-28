@@ -1,22 +1,21 @@
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.9.0'
-  id 'application'
+    id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io/' }
+}
+
+dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
 }
 
 group = 'org.projectmct'
 version = 'alpha-0.1'
 
-repositories {
-  mavenCentral()
-  maven { url 'https://jitpack.io/' }
-}
-
 java {
-  toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
-  }
-}
-
-kotlin {
-  jvmToolchain(17)
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
