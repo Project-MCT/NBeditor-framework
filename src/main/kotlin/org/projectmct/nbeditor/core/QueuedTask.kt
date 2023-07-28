@@ -1,17 +1,17 @@
 package org.projectmct.nbeditor.core
 
-class QueuedTask(val task: Runnable) {
+open class QueuedTask(val task: Runnable) {
   /**任务当前状态*/
   var status: TaskStatus = TaskStatus.Queuing
   var time: Long = 0
 
-  fun execute(){
+  open fun execute(){
     status = TaskStatus.Executing
     time = System.nanoTime();
     task.run()
     finish()
   }
-  fun finish(){
+  open fun finish(){
     time = System.nanoTime()
     status = TaskStatus.Finished
   }
