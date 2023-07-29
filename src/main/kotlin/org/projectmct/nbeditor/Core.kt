@@ -1,39 +1,41 @@
 package org.projectmct.nbeditor
 
+import kotlinx.coroutines.Runnable
 import org.projectmct.nbeditor.core.AbstractModule
 import org.projectmct.nbeditor.core.QueuedTask
-import java.lang.IllegalStateException
-import java.util.LinkedList
-import java.util.Queue
-import java.util.concurrent.ArrayBlockingQueue
-import java.util.concurrent.BlockingQueue
+import java.util.*
 import java.util.concurrent.LinkedBlockingDeque
 import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.collections.LinkedHashMap
 import kotlin.concurrent.thread
 
-private const val SEC_NANO: Long = 1000000000
+const val SEC_NANO: Long = 1000000000
+/**global standard unit frame rate, is base value for frame increment calculation*/
+const val GLOBAL_STANDARD_FRAME_SPEED = 60
 
 abstract class Core {
   /**the number of updates in one second normally, -1 meaning infinity*/
-  var standardFrameSpeed: Int = -1
+  var maxUpdateSpeed: Int = -1
   /**the maximum number of asynchronous tasks that can be executed simultaneously, please modify before initialize*/
   var taskExecutes: Int = 8
 
-  private var timeDelta: Long = 0
+  private var timeDelta: Float = 0f
 
   private val syncModules: ArrayList<AbstractModule> = ArrayList()
   private val asyncModules: LinkedHashMap<AbstractModule, Thread> = LinkedHashMap()
 
-  private val taskMap: HashMap<QueuedTask, Runnable> = HashMap()
-  private val taskQueue: LinkedList<QueuedTask> = LinkedList()
+  private val taskMap: MutableMap<QueuedTask, Runnable> = Collections.synchronizedMap(HashMap())
+  private var queuingTasks = 0
   private var executingTasks = 0
 
   private var executor: ThreadPoolExecutor? = null
 
-  /**last main loop refresh interval*/
-  fun timeDelta(): Long = timeDelta
+  fun timeDelta() = timeDelta
+  fun queuedTasks() = queuingTasks
+  fun executingTasks() = executingTasks
 
   /**the entry point required by the program, this method is called directly at startup*/
   fun launch(){
@@ -42,36 +44,19 @@ abstract class Core {
     init()
 
     executor = ThreadPoolExecutor(taskExecutes, taskExecutes, SEC_NANO, TimeUnit.NANOSECONDS, LinkedBlockingDeque())
-    thread {
-      while (true) {
-        synchronized(this){
-          //更新异步任务队列
-          while (executingTasks < taskExecutes && !taskQueue.isEmpty()) {
-            val task = taskQueue.removeFirst()
-            executingTasks++
-
-            val exe = Runnable {
-              task.execute()
-              executingTasks--
-            }
-            taskMap[task] = exe
-            executor?.execute(exe)
-          }
-        }
-      }
-    }
 
     var lastTime = System.nanoTime()
 
     while (true){
-      timeDelta = System.nanoTime() - lastTime
-      lastTime = System.nanoTime()
+      val curr = System.nanoTime()
 
+      timeDelta = (curr - lastTime).toFloat()/(SEC_NANO/GLOBAL_STANDARD_FRAME_SPEED)
+      lastTime = curr
       syncModules.forEach{ it.loop() }
       mainLoop()
 
-      val waitTime = System.nanoTime() + (SEC_NANO/standardFrameSpeed - System.nanoTime() + lastTime).minus(0)
-      while (System.nanoTime() < waitTime) Thread.onSpinWait()//精度优先，此处执行自旋等待
+      val wait = (SEC_NANO/maxUpdateSpeed - System.nanoTime() + curr).minus(0)
+      if (wait > 0) Thread.sleep(wait/1000000, (wait%1000000).toInt())
     }
   }
 
@@ -88,8 +73,8 @@ abstract class Core {
         while (true){
           val last = System.nanoTime()
           module.loop()
-          val wait = (SEC_NANO/module.standardFrameSpeed - System.nanoTime() + last).minus(0)
-          if (wait > 0) Thread.sleep(wait/1000)//nanosecond to millisecond
+          val wait = (SEC_NANO/module.maxUpdateSpeed - System.nanoTime() + last).minus(0)
+          if (wait > 0) Thread.sleep(wait/1000000, (wait%1000000).toInt())
         }
       }
     }
@@ -107,21 +92,27 @@ abstract class Core {
   }
 
   fun queueTask(task: Runnable): QueuedTask{
-    synchronized(this){
-      val t = object: QueuedTask(task){
-        override fun finish() {
-          synchronized(this){
-            (executor?: throw IllegalStateException("core uninitialized!")).remove(taskMap[this])
-          }
+    val t = object: QueuedTask(task){
+      override fun finish() {
+        synchronized(this@Core){
+          (executor?: throw IllegalStateException("core uninitialized!")).remove(taskMap[this])
           super.finish()
+          if (status == TaskStatus.Queuing) queuingTasks--
+          else executingTasks--
         }
       }
-      taskQueue.add(t)
-      return t
     }
-  }
-  fun queuedTasks(): Int{
-    return taskQueue.size;
+
+    queuingTasks++
+    val exe = Runnable {
+      queuingTasks--
+      executingTasks++
+      t.execute()
+      executingTasks--
+    }
+    taskMap[t] = exe
+    executor?.execute(exe)
+    return t
   }
 
   abstract fun init()

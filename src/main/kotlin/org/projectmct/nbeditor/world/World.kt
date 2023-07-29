@@ -1,6 +1,6 @@
 package org.projectmct.nbeditor.world
 
-import org.projectmct.nbeditor.nbtutils.NbtTree
+import org.projectmct.nbeditor.utils.nbt.NbtTree
 import java.io.File
 
 abstract class World(val worldFile: File) {
@@ -12,8 +12,10 @@ abstract class World(val worldFile: File) {
 
   val levelDat = NbtTree()
 
-  fun icon(): File = File(worldFile, "icon.png")
-  fun levelDatFile(): File = File(worldFile, "level.dat")
+  fun icon() = File(worldFile, "icon.png")
+  fun levelDatFile() = File(worldFile, "level.dat")
+
+  abstract fun listAllFiles(): List<File>
 
   abstract fun getChunks(beginIndexX: Int, beginIndexY: Int, endIndexX: Int, endIndexY: Int): Chunk
   abstract fun getChunk(indexX: Int, indexY: Int): Chunk

@@ -1,6 +1,9 @@
+
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.9.0'
   id 'application'
+  id 'org.jetbrains.kotlin.jvm' version '1.9.0'
+  id 'com.github.johnrengelman.shadow' version '8.0.0'
+  id 'org.graalvm.buildtools.native' version '0.9.12'
 }
 
 group = 'org.projectmct'
@@ -8,15 +11,50 @@ version = 'alpha-0.1'
 
 repositories {
   mavenCentral()
+  gradlePluginPortal()
   maven { url 'https://jitpack.io/' }
 }
 
+dependencies {
+  shadow("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
+  shadow("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+}
+
+graalvmNative {
+  binaries {
+    main {
+      javaLauncher = javaToolchains.launcherFor {
+        it.languageVersion = JavaLanguageVersion.of(17)
+      }
+    }
+  }
+}
+
+shadowJar {
+  archiveBaseName.set('shadow')
+}
+
+kotlin {
+  jvmToolchain {
+    languageVersion.set(JavaLanguageVersion.of(17))
+  }
+}
+
 java {
+  sourceCompatibility = JavaVersion.VERSION_17
+  targetCompatibility = JavaVersion.VERSION_17
+
   toolchain {
     languageVersion = JavaLanguageVersion.of(17)
   }
 }
 
-kotlin {
-  jvmToolchain(17)
+jar{
+  manifest{
+    attributes "Main-Class":"org.projectmct.nbeditor.TestKt"
+  }
+}
+
+application{
+  mainClass = "org.projectmct.nbeditor.TestKt"
 }

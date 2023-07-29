@@ -1,4 +1,4 @@
-package org.projectmct.nbeditor.nbtutils
+package org.projectmct.nbeditor.utils.nbt
 
 import java.io.ByteArrayInputStream
 import java.io.File

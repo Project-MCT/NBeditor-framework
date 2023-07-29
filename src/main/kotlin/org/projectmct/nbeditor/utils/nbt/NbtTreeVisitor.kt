@@ -1,7 +1,7 @@
-package org.projectmct.nbeditor.nbtutils
+package org.projectmct.nbeditor.utils.nbt
 
 open class NbtTreeVisitor {
-  open fun <T> visit(tree: NbtTree.NbtTreeNode<T>){
+  open fun visit(tree: NbtTree.NbtTreeNode<*>){
     when (tree) {
       is NbtTree.NbtCompound -> visitCombination(tree)
       is NbtTree.NbtList -> visitArray(tree)
@@ -24,7 +24,7 @@ open class NbtTreeVisitor {
     }
   }
 
-  open fun visitAttribute(name: String, value: NbtTree.NbtTreeNode<Any>){
+  open fun visitAttribute(name: String, value: NbtTree.NbtTreeNode<*>){
     visit(value)
   }
 
