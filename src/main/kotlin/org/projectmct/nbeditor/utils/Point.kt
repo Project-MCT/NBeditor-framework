@@ -1,6 +1,6 @@
 package org.projectmct.nbeditor.utils;
 
-class Point(val x: Int, val y: Int, val z: Int) {
+class Point(val x: Int = 0, val y: Int = 0, val z: Int = 0) {
   private val hash = x*y.rotateLeft(9)*z.rotateLeft(18)
 
   override fun hashCode() = hash

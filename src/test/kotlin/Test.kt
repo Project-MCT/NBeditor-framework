@@ -36,7 +36,7 @@ val core = object: Core(){
 
 }
 
-fun main(args: Array<String>) {
+fun main() {
   core.maxUpdateSpeed = 60
   core.addModule(object: AbstractModule(){
     val scanner = Scanner(System.`in`)
@@ -52,17 +52,12 @@ fun main(args: Array<String>) {
     override fun update() {
       val input = scanner.nextLine()
 
-      val task = core.queueTask{
-        for (i in 0..20){
+      for (i in 0..20){
+        core.queueTask{
           println("$input: $i")
         }
       }
-
-      for (i in 1..500) print("-")
-
-      task.finish()
     }
-
   }, async = true)
 
   core.launch()
