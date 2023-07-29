@@ -1,5 +1,4 @@
-package org.projectmct.nbeditor
-
+import org.projectmct.nbeditor.Core
 import org.projectmct.nbeditor.core.AbstractModule
 import org.projectmct.nbeditor.utils.nbt.NbtTree
 import java.util.*
