@@ -18,6 +18,8 @@ repositories {
 dependencies {
   shadow("org.jetbrains.kotlin:kotlin-stdlib:1.9.0")
   shadow("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+  shadow('com.github.Querz:NBT:6.1')
+  testImplementation('com.github.Querz:NBT:6.1')
 }
 
 graalvmNative {

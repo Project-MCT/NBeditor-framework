@@ -15,17 +15,15 @@ val core = object: Core(){
     val child = NbtTree.NbtCompound()
     root["key4"] = child
     child["k1"] = NbtTree.NbtLong(98L)
-    child["k2"] = NbtTree.NbtBoolean(false)
-    val arr = NbtTree.NbtList()
+    child["k2"] = NbtTree.NbtLong(777L)
+    val arr = NbtTree.NbtByteArray()
     child["k3"] = arr
-    arr.append(NbtTree.NbtLong(98L))
-    arr.append(NbtTree.NbtLabel("ssas"))
+    arr.append(17)
+    arr.append(22)
     tree.set(root)
 
     println(tree.toSNbt())
     val copy = NbtTree(child.clone())
-
-    copy.root()["jiji"] = NbtTree.NbtLabel("jiasjiajisjdijaj")
 
     println(NbtTree(child).toSNbt())
     println(copy.toSNbt())
