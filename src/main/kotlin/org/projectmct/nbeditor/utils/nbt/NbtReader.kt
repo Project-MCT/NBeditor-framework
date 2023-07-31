@@ -1,30 +1,32 @@
 package org.projectmct.nbeditor.utils.nbt
 
-import org.projectmct.nbeditor.utils.nbt.NbtTree.*
 import org.projectmct.nbeditor.utils.nbt.NbtTree.Companion.ENDTAG
+import org.projectmct.nbeditor.utils.nbt.nodes.*
 import java.io.*
 import java.nio.ByteBuffer
 
-open class NbtReader(val input: DataInputStream) {
+open class NbtReader(val input: DataInputStream): NbtDeserializer {
   constructor(inputStream: InputStream): this(DataInputStream(inputStream))
   constructor(file: File): this(DataInputStream(FileInputStream(file)))
   constructor(path: String): this(DataInputStream(FileInputStream(path)))
   constructor(bytes: ByteArray): this(DataInputStream(ByteArrayInputStream(bytes)))
   constructor(buffer: ByteBuffer): this(buffer.array())
 
-  fun readRawNode(): NbtCompound{
-    val res = NbtCompound()
-
+  override fun readNbt(): NbtTree {
     val id = input.readByte().toInt()
     val name = input.readUTF()
-    res[name] = readNext(id)
 
-    return res
+    return NbtTree(name, readNext(id))
   }
-  fun readNbt(): NbtTree = NbtTree(readRawNode())
-  fun readToTree(tree: NbtTree){ tree.set(readCompound()) }
 
-  protected fun readNext(typeID: Int): NbtTreeNode<*>{
+  override fun readRaw(): NbtTreeNode<*> {
+    val id = input.readByte().toInt()
+    input.readUTF()
+
+    return readNext(id)
+  }
+
+  protected open fun readNext(typeID: Int): NbtTreeNode<*> {
     return when(typeID){
       0 -> ENDTAG
       1 -> readByte()
@@ -43,15 +45,15 @@ open class NbtReader(val input: DataInputStream) {
     }
   }
 
-  protected fun readByte() = NbtByte(input.readByte())
-  protected fun readShort() = NbtShort(input.readShort())
-  protected fun readInt() = NbtInt(input.readInt())
-  protected fun readLong() = NbtLong(input.readLong())
-  protected fun readFloat() = NbtFloat(input.readFloat())
-  protected fun readDouble() = NbtDouble(input.readDouble())
-  protected fun readLabel() = NbtLabel(input.readUTF())
+  protected open fun readByte() = NbtByte(input.readByte())
+  protected open fun readShort() = NbtShort(input.readShort())
+  protected open fun readInt() = NbtInt(input.readInt())
+  protected open fun readLong() = NbtLong(input.readLong())
+  protected open fun readFloat() = NbtFloat(input.readFloat())
+  protected open fun readDouble() = NbtDouble(input.readDouble())
+  protected open fun readLabel() = NbtLabel(input.readUTF())
 
-  protected fun readByteArray(): NbtByteArray {
+  protected open fun readByteArray(): NbtByteArray {
     val arr = NbtByteArray()
     val len = input.readInt()
 
@@ -60,7 +62,7 @@ open class NbtReader(val input: DataInputStream) {
     }
     return arr
   }
-  protected fun readIntArray(): NbtIntArray {
+  protected open fun readIntArray(): NbtIntArray {
     val arr = NbtIntArray()
     val len = input.readInt()
 
@@ -69,7 +71,7 @@ open class NbtReader(val input: DataInputStream) {
     }
     return arr
   }
-  protected fun readLongArray(): NbtLongArray {
+  protected open fun readLongArray(): NbtLongArray {
     val arr = NbtLongArray()
     val len = input.readInt()
 
@@ -79,7 +81,7 @@ open class NbtReader(val input: DataInputStream) {
     return arr
   }
 
-  protected fun readList(): NbtList<*> {
+  protected open fun readList(): NbtList<*> {
     val listType: Byte = input.readByte()
     val list = NbtList<NbtTreeNode<*>>(NbtTree.getTypeClass(listType.toInt()))
     val length = input.readInt().minus(0)
@@ -89,7 +91,7 @@ open class NbtReader(val input: DataInputStream) {
     }
     return list
   }
-  protected fun readCompound(): NbtCompound {
+  protected open fun readCompound(): NbtCompound {
     val res = NbtCompound()
     var id = input.readByte().toInt().and(0xFF)
 

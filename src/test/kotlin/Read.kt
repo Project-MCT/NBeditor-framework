@@ -1,24 +1,26 @@
-import net.querz.nbt.io.LittleEndianNBTInputStream
 import net.querz.nbt.io.NBTDeserializer
-import net.querz.nbt.io.NBTInputStream
-import org.projectmct.nbeditor.utils.nbt.NbtReader
-import org.projectmct.nbeditor.utils.nbt.NbtTree
+import org.projectmct.nbeditor.utils.nbt.*
 import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.util.Scanner
+import java.io.FileOutputStream
 import java.util.zip.GZIPInputStream
 
 fun main() {
-  val input = GZIPInputStream(FileInputStream("level.dat"))
+  val reader = SNbtParser(
+    """
+    "root": {
+      "key2": [I; 123, 456, 789],
+      "key3": [I;
+        1,2,3,4,5,6
+      ]
+    }
+    """)
 
-  val n = NbtTree()
-  NbtReader(input).readToTree(n)
+  val tree = reader.readNbt()
+  println(tree.toSNbt())
 
-  println(n.toSNbt())
+  val writer = NbtWriter(FileOutputStream("output.nbt"))
+  writer.write(tree)
 
-  val scan = Scanner(System.`in`)
-  while (scan.nextLine() != null){
-    print(input.read())
-  }
-
+  val r = NbtReader(FileInputStream("output.nbt"))
+  println(r.readNbt().toSNbt())
 }
