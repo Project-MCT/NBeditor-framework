@@ -8,6 +8,7 @@ import java.io.InputStream
 import java.io.InputStreamReader
 import java.io.Reader
 import java.io.StringReader
+import java.lang.NumberFormatException
 import java.lang.RuntimeException
 import java.util.Queue
 import java.util.concurrent.ArrayBlockingQueue
@@ -108,19 +109,26 @@ open class SNbtParser(private val reader: Reader): NbtDeserializer {
         stringBuffer.append(token)
         decimal = true
       }
-      else when(token.lowercase()[0]){
-        'b' -> return NbtByte(stringBuffer.toString().toByte()) as Ret
-        's' -> return NbtShort(stringBuffer.toString().toShort()) as Ret
-        'l' -> return NbtLong(stringBuffer.toString().toLong()) as Ret
-        'd' -> return NbtDouble(stringBuffer.toString().toDouble()) as Ret
-        'f' -> return NbtFloat(stringBuffer.toString().toFloat()) as Ret
-        else -> {
-          reader.reset()
-          readCached.removeLast()
+      else {
+        try {
+          when (token.lowercase()[0]) {
+            'b' -> return NbtByte(stringBuffer.toString().toByte()) as Ret
+            's' -> return NbtShort(stringBuffer.toString().toShort()) as Ret
+            'l' -> return NbtLong(stringBuffer.toString().toLong()) as Ret
+            'd' -> return NbtDouble(stringBuffer.toString().toDouble()) as Ret
+            'f' -> return NbtFloat(stringBuffer.toString().toFloat()) as Ret
+            else -> {
+              reader.reset()
+              readCached.removeLast()
 
-          if (decimal) throw LexerCheckException("a decimal must declare F(float) or D(double) at end, but no", true)
-          return NbtInt(stringBuffer.toString().toInt()) as Ret
-        }
+              if (decimal) throw LexerCheckException(
+                "a decimal must declare F(float) or D(double) at end, but no",
+                true
+              )
+              return NbtInt(stringBuffer.toString().toInt()) as Ret
+            }
+          }
+        }catch (e: NumberFormatException){ throw LexerCheckException(e.message?:"", true) }
       }
 
       head = false
@@ -182,7 +190,13 @@ open class SNbtParser(private val reader: Reader): NbtDeserializer {
       else if (token == ']') break
 
       val node = readNode<NbtTreeNode<*>>(token)
-      if (tmp.isNotEmpty() && tmp.last()::class != node::class)
+      if (numberType != null){
+        if((numberType == NbtByteArray::class && node.typeID() != NbtByte.ID)
+          || (numberType == NbtIntArray::class && node.typeID() != NbtInt.ID)
+          || (numberType == NbtLongArray::class && node.typeID() != NbtLong.ID))
+          throw LexerCheckException("array type is \"${numberType.simpleName}\", but trying put a \"${node::class.simpleName}\" to this array", true)
+      }
+      else if (tmp.isNotEmpty() && tmp.last()::class != node::class)
         throw LexerCheckException("array element must be same type, but existed two and more", true)
 
       tmp.add(node)

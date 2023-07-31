@@ -8,7 +8,7 @@ fun main() {
   val reader = SNbtParser(
     """
     "root": {
-      "key2": [I; 123, 456, 789],
+      "key2": [B; 123b, 111b, 319b],
       "key3": [I;
         1,2,3,4,5,6
       ]
